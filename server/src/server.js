@@ -37,15 +37,9 @@ function validate(request, username, password, cb) {
     }
 }
 
-server.state('user_id', {
-    ttl: null,
-    path: '/',
-    isSecure: false,
-    isHttpOnly: true,
-    encoding: 'base64json',
-    clearInvalid: false, // remove invalid cookies
-    strictHeader: false // don't allow violations of RFC 6265
-});
+
+server.auth.strategy('simple', 'basic', { validateFunc: validate });
+
 
 server.route({
     method: 'GET',
@@ -57,53 +51,85 @@ server.route({
 });
 
 server.route({
+    method: 'POST',
+    path:'/location',
+    config: {
+        handler: function (request, reply) {
+            pg.query('INSERT INTO user_location (location) VALUES $1', [request.param.location]);
+        }
+    }
+    
+});
+
+
+server.route({
+    method: 'GET',
+    path:'/get_messages',
+    config: {
+        handler: function (request, reply) {
+            var time = request.params.time;
+            if (time) {
+                pg.query('SELECT location, message FROM message WHERE time > $1 ORDER BY time', [time, amount])
+                .then((results) => {
+                    reply(results.rows);
+                });
+            } else {
+                reply("Need to specify ?time=<UNIX-timestamp>");
+            }
+        }
+    }
+    
+});
+
+
+server.route({
     method: 'GET',
     path:'/admin',
-    handler: function (request, reply) {
-        var user_id = request.state.user_id;
-        if (!user_id) {
-            reply.view('admin_login', {});
+    config: {
+        auth: 'simple',
+        handler: function (request, reply) {
+            reply.view('admin', {});
         }
-        pg.query('SELECT * FROM admin WHERE user_id=$1', user_id)
-        .then((results) => {
-            if(results.rows.length > 0) {
-                reply.view('admin', {});
-            } else {
-                reply('403');
-            }
-        })
     }
 });
 
-server.route({
-    method: 'POST',
-    path:'/admin/login',
-    handler: function (request, reply) {
-        var user_id = request.state.user_id;
-        if (!user_id) {
-            if (request.params.user_name==="AOH" && request.params.password==="onBestEver") {
-                var user_id = uuid.v4();
-                reply.redirect('/admin').state('user_id', user_id);
-            }
-            else {
-                reply.redirect('/admin')
-            }
-        }
-        else {
-            reply.redirect('/admin')
-        }
-    }
-});
+
 
 server.route({
     method: 'POST',
     path:'/admin/location_message',
-    handler: function (request, reply) {
-        var user_id = request.state.user_id;
-        if (user_id) {
-            pg.query('INSERT INTO message (location, message) VALUES $1, $2;');            
+    config: {
+        auth: 'simple',
+        handler: function (request, reply) {
+            pg.query('INSERT INTO message (location, message) VALUES $1, $2;', [request.param.location, request.param.message]);
         }
     }
+    
+});
+
+server.route({
+    method: 'GET',
+    path:'/admin/get_location',
+    config: {
+        auth: 'simple',
+        handler: function (request, reply) {
+            var amount = request.params.amount || 10;
+            var time = request.params.time;
+            if (time) {
+                pg.query('SELECT location FROM user_location WHERE time > $1 ORDER BY time LIMIT $2', [time, amount])
+                .then((results) => {
+                    reply(results.rows);
+                });
+            }
+            else {
+                pg.query('SELECT location FROM user_location ORDER BY time LIMIT $1', [amount])
+                .then((results) => {
+                    reply(results.rows);
+                })
+            }
+        }
+    }
+    
 });
 
 
@@ -116,6 +142,7 @@ server.route({
         }
     }
 });
+
 
 // Start the server
 server.start((err) => {
