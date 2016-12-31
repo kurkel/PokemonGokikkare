@@ -1,6 +1,6 @@
 var pg = require('pg');
 const url = require('url');
-const params/*: Object*/ = url.parse(process.env.DATABASE_URL);
+const params/*: Object*/ = url.parse(process.env.VAIHTO_DATABASE_URL);
 const auth = params.auth.split(':');
 
 var pgconfig = {
