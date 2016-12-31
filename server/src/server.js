@@ -16,7 +16,7 @@ server.connection({
     labels: ['website']
 });
 
-server.register([Inert, Vision, h2o2], (err) => {
+server.register([Inert, Vision, h2o2, Basic], (err) => {
     Hoek.assert(!err, err);
 
   server.views({
