@@ -30,10 +30,10 @@ server.register([Inert, Vision, h2o2, Basic], (err) => {
 
 function validate(request, username, password, cb) {
     if(username === 'AOH' && password === 'onBestEver') {
-        callback(null, true, { id: username, name: username });
+        cb(null, true, { id: username, name: username });
     }
     else {
-        return callback(null, false);
+        return cb(null, false);
     }
 }
 
@@ -138,7 +138,7 @@ server.route({
     path: '/static/{param*}',
     handler: {
         directory: {
-            path: 'server/assets'
+            path: 'src/static'
         }
     }
 });
