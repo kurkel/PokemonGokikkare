@@ -68,14 +68,20 @@ server.route({
     config: {
         handler: function (request, reply) {
             var time = request.params.time;
+            var amount = request.params.amount;
+            var q = 'SELECT location, message, time FROM message';
             if (time) {
-                pg.query('SELECT location, message FROM message WHERE time > $1 ORDER BY time', [time, amount])
-                .then((results) => {
-                    reply(results.rows);
-                });
+                q = q + ' WHERE time > ' + time;
+            } if (amount) {
+                q = q + ' ORDER BY time DESC LIMIT ' + amount;
             } else {
-                reply("Need to specify ?time=<UNIX-timestamp>");
+                 q = q + ' ORDER BY time DESC';
             }
+            pg.query(q, [])
+            .then((results) => {
+                console.log(results.rows.length);
+                reply(results.rows);
+            })
         }
     }
     
@@ -101,7 +107,9 @@ server.route({
     config: {
         auth: 'simple',
         handler: function (request, reply) {
-            pg.query('INSERT INTO message (location, message) VALUES $1, $2;', [request.param.location, request.param.message]);
+            console.log(request.payload.location)
+            pg.query('INSERT INTO message (location, message) VALUES ($1, $2);', [request.payload.location, request.payload.message]);
+            reply();
         }
     }
     
