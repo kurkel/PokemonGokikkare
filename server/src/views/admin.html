@@ -7,10 +7,16 @@
 	</head>
 
 	<body>
+		<div class="counter">
+			<p class="counter" id="counter"></p>
+		</div>
 		<div id="header">
 			<h2 class="row text-center montserrat">VaihtoAdmin</h2>
 			<div class="row">
-				<textarea id="textbox" rows="4" cols="50"></textarea>
+				<textarea id="textbox" class="inputarea" rows="4" cols="50"></textarea>
+			</div>
+			<div class="row" style="margin-top: 10px; color:#FFFFFF;">
+				Pokemón: <input type="text" class="inputarea" id="pokemon"></input>
 			</div>
 			<div class="row" style="margin-top: 10px;">
 				<button class="btn btn-default" onclick="send()">Send</button>

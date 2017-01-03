@@ -55,7 +55,8 @@ server.route({
     path:'/location',
     config: {
         handler: function (request, reply) {
-            pg.query('INSERT INTO user_location (location) VALUES $1', [request.param.location]);
+            pg.query('INSERT INTO location (location) VALUES ($1)', [request.payload.location])
+            .then(reply("200"));
         }
     }
     
@@ -67,11 +68,14 @@ server.route({
     path:'/get_messages',
     config: {
         handler: function (request, reply) {
-            var time = request.params.time;
-            var amount = request.params.amount;
-            var q = 'SELECT location, message, time FROM message';
+            var time = request.query.time;
+            var amount = request.query.amount;
+            var q = 'SELECT location, message, icon, time FROM message';
             if (time) {
-                q = q + ' WHERE time > ' + time;
+                time = new Date(time);
+                time.setSeconds(time.getSeconds() + 1);
+                time = time.toISOString().replace('T', ' ');
+                q = q + " WHERE time > '" + time + "'";
             } if (amount) {
                 q = q + ' ORDER BY time DESC LIMIT ' + amount;
             } else {
@@ -81,7 +85,7 @@ server.route({
             .then((results) => {
                 console.log(results.rows.length);
                 reply(results.rows);
-            })
+            }).catch((e) => {console.log(e)});
         }
     }
     
@@ -108,7 +112,7 @@ server.route({
         auth: 'simple',
         handler: function (request, reply) {
             console.log(request.payload.location)
-            pg.query('INSERT INTO message (location, message) VALUES ($1, $2);', [request.payload.location, request.payload.message]);
+            pg.query('INSERT INTO message (location, message, icon) VALUES ($1, $2, $3);', [request.payload.location, request.payload.message, request.payload.pokemon]);
             reply();
         }
     }
@@ -121,20 +125,25 @@ server.route({
     config: {
         auth: 'simple',
         handler: function (request, reply) {
-            var amount = request.params.amount || 10;
-            var time = request.params.time;
+            var amount = request.query.amount;
+            var time = request.query.time;
+
+            var q = 'SELECT location, time FROM location';
+
             if (time) {
-                pg.query('SELECT location FROM user_location WHERE time > $1 ORDER BY time LIMIT $2', [time, amount])
-                .then((results) => {
-                    reply(results.rows);
-                });
+                time = new Date(time);
+                time.setSeconds(time.getSeconds() + 1);
+                time = time.toISOString().replace('T', ' ');
+                q = q + " WHERE time > '" + time + "'";
             }
-            else {
-                pg.query('SELECT location FROM user_location ORDER BY time LIMIT $1', [amount])
+            q = q + ' ORDER BY time'
+            if (amount) {
+                q = q + ' LIMIT ' + amount + ';';
+            }
+             pg.query(q, [])
                 .then((results) => {
                     reply(results.rows);
                 })
-            }
         }
     }
     

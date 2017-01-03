@@ -4,7 +4,9 @@
 	text-shadow: 1px 1px #AAAAAA;
 }
 
-#textbox {
+.coun
+
+.inputarea {
 	background-color: #666666;
 	color: #EEEEEE;
 }
@@ -53,4 +55,42 @@ hr {
 	width: 100vw;
 	bottom: 0px;
 	position: absolute;
+}
+
+
+.circle {
+  background-color: transparent;
+  position: relative;
+  left: 50%;
+  margin-left: -25px;
+  top: 50%;
+  margin-top: -25px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  animation: radar 2s infinite;
+  -webkit-animation: radar 2s infinite;
+  -webkit-transition: all linear;
+  transition: all linear;
+}
+
+@keyframes radar {
+  100% {
+    width: 50px;
+    height: 50px;
+    margin-left: -25px;
+    margin-top: -25px;
+    border-color: #333;
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes radar {
+  100% {
+    width: 50px;
+    height: 50px;
+    margin-left: -25px;
+    margin-top: -25px;
+    border-color: #333;
+    opacity: 0,
+  }
 }

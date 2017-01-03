@@ -75,7 +75,8 @@ CREATE TABLE message (
     id integer NOT NULL,
     "time" timestamp with time zone DEFAULT now(),
     message character varying,
-    location character varying
+    location character varying,
+    icon character varying
 );
 
 
@@ -128,14 +129,14 @@ COPY location (id, "time", location) FROM stdin;
 -- Name: location_id_seq; Type: SEQUENCE SET; Schema: public; Owner: kurkel
 --
 
-SELECT pg_catalog.setval('location_id_seq', 1, false);
+SELECT pg_catalog.setval('location_id_seq', 5, true);
 
 
 --
 -- Data for Name: message; Type: TABLE DATA; Schema: public; Owner: kurkel
 --
 
-COPY message (id, "time", message, location) FROM stdin;
+COPY message (id, "time", message, location, icon) FROM stdin;
 \.
 
 
@@ -143,7 +144,7 @@ COPY message (id, "time", message, location) FROM stdin;
 -- Name: message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: kurkel
 --
 
-SELECT pg_catalog.setval('message_id_seq', 1, false);
+SELECT pg_catalog.setval('message_id_seq', 19, true);
 
 
 --
