@@ -1,0 +1,16 @@
+{
+  "apps" : [{
+    // Application #1
+    "name"        : "HallitusVaihto",
+    "script"      : "bootstrap.js",
+    "watch"       : true,
+    "cwd"         : "/home/kurkel/PokemonGokikkare/server",
+    "node_args"   : "--harmony",
+    "merge_logs"  : true,
+    "env": {
+      "PORT": "8000",
+      "VAIHTO_DATABASE_URL": "postgres://vaihto:pass@localhost:5432/vaihto"
+
+    }
+  }]
+}

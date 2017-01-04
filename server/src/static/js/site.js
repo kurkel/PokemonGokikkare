@@ -124,6 +124,7 @@ function cleanSelected() {
 		layerControl.removeLayer(selected);
 	}
 	selected = null;
+	select_marker = null;
 }
 
 function addMarker(e){
@@ -134,6 +135,7 @@ function addMarker(e){
     if (selected && layerControl) {
     	cleanSelected();
     }
+	console.log(JSON.stringify(e.latlng));
     var marker = L.marker(e.latlng);
     selected = L.layerGroup().addLayer(marker).addTo(map);
     select_marker = marker;

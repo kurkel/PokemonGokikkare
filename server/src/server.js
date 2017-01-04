@@ -136,7 +136,7 @@ server.route({
                 time = time.toISOString().replace('T', ' ');
                 q = q + " WHERE time > '" + time + "'";
             }
-            q = q + ' ORDER BY time'
+            q = q + ' ORDER BY time DESC'
             if (amount) {
                 q = q + ' LIMIT ' + amount + ';';
             }
