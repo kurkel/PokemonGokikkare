@@ -19,30 +19,104 @@
         padding: 10px;
         font-family: 'Open Sans', sans-serif;
     }
+    .marker{
+      width: 96px;
+      height: 96px;
+      position: relative;
+      top: -48px;
+      left: -48px;
+    }
+
+    .mapboxgl-ctrl-attrib{
+      display: none;
+    }
+
+    #compass{
+      position: absolute;
+      right: 0px;
+    }
+
+    #menu{
+      position: absolute;
+      width: 80vw;
+      height: 75vh;
+      left: 7.5vw;
+      top: -100vh;
+      transition: top 0.5s;
+      -webkit-transition: top 0.5s;
+      background-color: #eee;
+      border-radius: 5px;
+    }
+
+    #guiBottom{
+      position: absolute;
+      width: 100%;
+      bottom: 20vw;
+      text-align: center;
+    }
+
+    #rotRight{
+      position: absolute;
+      right: 10px;
+      width: 20vw;
+    }
+
+    #ball{
+      position: absolute;
+      width: 25vw;
+      left: 37.5vw;
+      bottom: -20vw;
+    }
+
+    #rotLeft{
+      position: absolute;
+      left: 10px;
+      width: 20vw;
+    }
 </style>
 
 <div id='map'></div>
+
+<img id='compass' src="static/compass.png" onclick="map.rotateTo(0)"></img>
+
+<div id="menu"></div>
+
+<div id='guiBottom'>
+<img id='rotRight' src="static/rotRight.png" onclick="rotateMap(45)"></img>
+<img id='ball' src="static/pokeball.svg" onclick="toggleMenu()"></img>
+<img id='rotLeft' src="static/rotLeft.png" onclick="rotateMap(-45)"></img>
+</div>
+
 <script>
 mapboxgl.accessToken = 'pk.eyJ1Ijoibm9ydGhlcm5jb2RlIiwiYSI6ImNpd3NiYTE5bzAwMTUyem81ZTE1ZG9zMGoifQ.zM0Rfus50nMyZd1TfaMztQ';
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/northerncode/ciwsbkv2q00gc2qqycboaeqg4',
     zoom: 17.36,
-    pitch: 35.00,
-    center: [4.899, 52.372]
+    pitch: 60.00,
+    center: [24.822285, 60.187281],
+    interactive: false
 });
+
+
+var img_url = 'static/pokemons/001.png';
+var el = document.createElement('div');
+el.className = 'marker';
+el.style.backgroundImage = 'url(' + img_url + ')';
+
+new mapboxgl.Marker(el).setLngLat([24.822285, 60.187281]).addTo(map);
 
 function easeTo(t) {
   return t * (2 - t);
 }
 
 function getGPS(){
-			if(navigator.geolocation){
-				var options = {timeout:60000, enableHighAccuracy:true};
-                navigator.geolocation.watchPosition(setPos, errorHandler, options);
-			}else{
-				alert("no gps");
-			}
+  if(navigator.geolocation){
+    var options = {timeout:60000, enableHighAccuracy:true};
+    navigator.geolocation.watchPosition(setPos, errorHandler, options);
+	}else{
+		alert("no gps");
+	}
 }
 
 function setPos(loc){
@@ -52,9 +126,21 @@ function setPos(loc){
    });
 }
 
+function rotateMap(deg){
+  map.rotateTo(map.getBearing() + deg);
+}
+
+var menu = document.getElementById('menu');
+menu.style.top = '-100vh';
+
+function toggleMenu(){
+  menu.style.top = (menu.style.top == '-100vh' ? '4vh' : '-100vh');
+}
+
 function errorHandler(err){
 
 }
+
 
 getGPS();
 
