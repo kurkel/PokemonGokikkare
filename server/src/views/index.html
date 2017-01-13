@@ -59,7 +59,6 @@
     }
 
     #content{
-      text-align: left;
       font-size: 6vw;
     }
 
@@ -194,7 +193,7 @@ function takePic() {
 }
 
 function showMessage(event){
-  if(event.target.dataset.read == 0){
+  if(event.target.dataset.read === 0){
     content.innerHTML += '<br/><br/><img class="ball" src="static/pokeball.svg"></img><br/><br/>';
     content.innerHTML += event.target.dataset.msg;
     menu.scrollTop = menu.scrollHeight;
@@ -210,45 +209,10 @@ setInterval(function(){
 }, 15000);
 
 var msg = [];
-setInterval(function(){
-  var alerts = true;
-  if (pokemonCount == 0) alerts = false;
-  $.get( "/get_messages", function( data ) {
-    for(var i = pokemonCount; i < data.length; i++){
-      var pokeLoc = JSON.parse(data[i].location);
-      if (pokeLoc){
-        var img_url = 'static/pokemons/' + data[i].icon +'.png';
-        pokemons[i] = document.createElement('div');
-        pokemons[i].className = 'marker';
-        pokemons[i].style.backgroundImage = 'url(' + img_url + ')';
-
-        pokemons[i].dataset.msg = '' + data[i].message;
-        pokemons[i].dataset.read = 0;
-        pokemons[i].onclick = function(){ showMessage(event) };
-
-        var pokeLoc = JSON.parse(data[i].location);
-
-        new mapboxgl.Marker(pokemons[i]).setLngLat([pokeLoc.lng, pokeLoc.lat]).addTo(map);
-      }else if(alerts){
-        content.innerHTML += '<br/><br/><img class="ball" src="static/pokeball.svg"></img><br/><br/>';
-        content.innerHTML += data[i].message;
-        menu.scrollTop = menu.scrollHeight;
-        menu.style.top = '4vh';
-      }
-      pokemonCount++;
-    }
-  });
-}, 15000);
 
 function errorHandler(e) {
   console.log(e);
 }
-
-setInterval(function(){
-  var locStr = '{"lat":' + lastLoc.lat + ', "lng":' + lastLoc.lng +'}';
-  $.post("/location", {location: locStr}, function( data ){
-  });
-}, 120000);
 
 var myInput = document.getElementById('myFileInput');
 
@@ -272,6 +236,8 @@ $(myInput).change(sendPic);
 
 var msg = [];
 function getMessages() {
+  var alerts = true;
+  if (pokemonCount == 0) alerts = false;
   $.get( "/get_messages", function( data ) {
     for(var i = pokemonCount; i < data.length; i++){
       var img_url = 'static/pokemons/' + data[i].icon +'.png';
