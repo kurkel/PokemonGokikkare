@@ -7,6 +7,7 @@ const Hoek = require('hoek');
 const pg = require('./pg');
 const Promise = require("bluebird");
 const Basic = require('hapi-auth-basic');
+var fs = require("fs");
 
 // Create a server with a host and port
 const server = new Hapi.Server();
@@ -26,6 +27,17 @@ server.register([Inert, Vision, h2o2, Basic], (err) => {
     relativeTo: __dirname,
     path: 'views',
   });
+});
+
+server.register({
+    'register': require('hapi-bully-imageupload'),
+    'options': {
+        'allowedMimeTypes': [ 'image/jpg', 'image/png' ],
+        'uploadPath': process.cwd() + '/images/' // Notice the last slash 
+    },
+    'routes': {
+        'prefix': '/upload'
+    }
 });
 
 function validate(request, username, password, cb) {
@@ -151,6 +163,46 @@ server.route({
 
 
 server.route({
+    method: 'POST',
+    path: '/image',
+    config: {
+
+        payload: {
+            maxBytes: 10048576,
+            output: 'stream',
+            parse: true,
+            allow: 'multipart/form-data'
+        },
+
+        handler: function (request, reply) {
+            console.log("request.payload");
+            var data = request.payload;
+            if (data.file) {
+                var name = data.file.hapi.filename;
+                var path = __dirname + "/images/" + name;
+                var file = fs.createWriteStream(path);
+
+                file.on('error', function (err) { 
+                    console.error(err) 
+                });
+
+                data.file.pipe(file);
+
+                data.file.on('end', function (err) { 
+                    var ret = {
+                        filename: data.file.hapi.filename,
+                        headers: data.file.hapi.headers
+                    }
+                    reply(JSON.stringify(ret));
+                })
+            }
+
+        }
+    }
+});
+
+
+server.route({
     method: 'GET',
     path: '/static/{param*}',
     handler: {
@@ -159,6 +211,8 @@ server.route({
         }
     }
 });
+
+
 
 
 // Start the server
