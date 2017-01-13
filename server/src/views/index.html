@@ -271,7 +271,7 @@ function sendPic() {
 $(myInput).change(sendPic);
 
 var msg = [];
-setInterval(function(){
+function getMessages() {
   $.get( "/get_messages", function( data ) {
     for(var i = pokemonCount; i < data.length; i++){
       var img_url = 'static/pokemons/' + data[i].icon +'.png';
@@ -288,10 +288,11 @@ setInterval(function(){
       pokemonCount++;
     }
   });
-}, 15000);
+}
+getMessages();
+setInterval(getMessages, 15000);
 getGPS();
 
-</script>
 </script>
 </body>
 </html>
