@@ -205,7 +205,7 @@ server.route({
   path: '/pictures',
   config: {
       handler: function (request, reply) {
-        fs.readdir('./src/static/pictures', (err, files) => {
+        fs.readdir('./src/images', (err, files) => {
           reply.view('pictures', {fileNames: files});
         })
       }
