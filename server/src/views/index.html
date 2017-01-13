@@ -58,7 +58,6 @@
     }
 
     #content{
-      text-align: left;
       font-size: 6vw;
     }
 
@@ -80,6 +79,10 @@
       width: 25vw;
       left: 37.5vw;
       bottom: -20vw;
+    }
+
+    .ball{
+      width: 10vw;
     }
 
     #rotLeft{
@@ -166,7 +169,12 @@ function toggleMenu(){
 }
 
 function showMessage(event){
-  content.innerHTML = event.target.dataset.msg;
+  if(event.target.dataset.read == 0){
+    content.innerHTML += '<br/><br/><img class="ball" src="static/pokeball.svg"></img><br/><br/>';
+    content.innerHTML += event.target.dataset.msg;
+    menu.scrollTop = menu.scrollHeight;
+    event.target.dataset.read = 1;
+  }
   toggleMenu();
 }
 
@@ -175,23 +183,34 @@ setInterval(function(){
   $.post("/location", {location: locStr}, function( data ){
     console.log(data);
   });
-}, 120000);
+}, 15000);
 
 var msg = [];
 setInterval(function(){
+  var alerts = true;
+  if (pokemonCount == 0) alerts = false;
   $.get( "/get_messages", function( data ) {
     for(var i = pokemonCount; i < data.length; i++){
-      var img_url = 'static/pokemons/' + data[i].icon +'.png';
-      pokemons[i] = document.createElement('div');
-      pokemons[i].className = 'marker';
-      pokemons[i].style.backgroundImage = 'url(' + img_url + ')';
-
-      pokemons[i].dataset.msg = '' + data[i].message;
-      pokemons[i].onclick = function(){ showMessage(event) };
-
       var pokeLoc = JSON.parse(data[i].location);
+      if (pokeLoc){
+        var img_url = 'static/pokemons/' + data[i].icon +'.png';
+        pokemons[i] = document.createElement('div');
+        pokemons[i].className = 'marker';
+        pokemons[i].style.backgroundImage = 'url(' + img_url + ')';
 
-      new mapboxgl.Marker(pokemons[i]).setLngLat([pokeLoc.lng, pokeLoc.lat]).addTo(map);
+        pokemons[i].dataset.msg = '' + data[i].message;
+        pokemons[i].dataset.read = 0;
+        pokemons[i].onclick = function(){ showMessage(event) };
+
+        var pokeLoc = JSON.parse(data[i].location);
+
+        new mapboxgl.Marker(pokemons[i]).setLngLat([pokeLoc.lng, pokeLoc.lat]).addTo(map);
+      }else if(alerts){
+        content.innerHTML += '<br/><br/><img class="ball" src="static/pokeball.svg"></img><br/><br/>';
+        content.innerHTML += data[i].message;
+        menu.scrollTop = menu.scrollHeight;
+        menu.style.top = '4vh';
+      }
       pokemonCount++;
     }
   });
