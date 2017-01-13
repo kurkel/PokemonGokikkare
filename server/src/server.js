@@ -9,6 +9,7 @@ const Promise = require("bluebird");
 const Basic = require('hapi-auth-basic');
 
 // Create a server with a host and port
+
 const server = new Hapi.Server();
 
 server.connection({
@@ -59,7 +60,7 @@ server.route({
             .then(reply("200"));
         }
     }
-    
+
 });
 
 
@@ -79,7 +80,7 @@ server.route({
             } if (amount) {
                 q = q + ' ORDER BY time DESC LIMIT ' + amount;
             } else {
-                 q = q + ' ORDER BY time DESC';
+                 q = q + ' ORDER BY time ASC';
             }
             pg.query(q, [])
             .then((results) => {
@@ -88,7 +89,7 @@ server.route({
             }).catch((e) => {console.log(e)});
         }
     }
-    
+
 });
 
 
@@ -116,7 +117,7 @@ server.route({
             reply();
         }
     }
-    
+
 });
 
 server.route({
@@ -146,7 +147,7 @@ server.route({
                 })
         }
     }
-    
+
 });
 
 
