@@ -201,6 +201,16 @@ server.route({
 });
 
 server.route({
+    method: 'GET',
+    path: '/images/{param*}',
+    handler: {
+        directory: {
+            path: 'src/images'
+        }
+    }
+});
+
+server.route({
   method: 'GET',
   path: '/pictures',
   config: {
