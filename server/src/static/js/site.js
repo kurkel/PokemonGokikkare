@@ -26,7 +26,7 @@ map.on('click', addMarker);
 getMessages();
 getLocation();
 
-setInterval(function(){ console.log(latest_message);getMessages(latest_message); }, 15000);
+setInterval(function(){ getMessages(latest_message); }, 15000);
 setInterval(function(){ getLocation(latest_location); }, 15000);
 
 function getLocation(time) {
@@ -51,7 +51,6 @@ function getLocation(time) {
 					marker = L.marker([l.lat, l.lng], {icon:dotIcon});
 					first = marker;
 				} else {
-					console.log(i);
 					marker = L.marker([l.lat, l.lng], {icon:dotIcon});
 				}
 				marker.bindPopup(reply[i].time);
@@ -89,7 +88,6 @@ function getMessages(time) {
 				latest_message = (reply[i].time > latest_message || !latest_message) ? reply[i].time : latest_message;
 
 				if (reply[i].location) {
-					console.log(reply[i].location, reply[i].message)
 					if (reply[i].message) {
 						l = JSON.parse(reply[i].location)
 						var ic = reply[i].icon || "000";
@@ -104,8 +102,7 @@ function getMessages(time) {
 						marker = L.marker([l.lat, l.lng], {icon:mIcon}).bindPopup(reply[i].message);
 					}
 					sent.addLayer(marker);
-				} else {
-					console.log(reply[i].message);				
+				} else {			
 					$('#messages').append(`<div class="message"><p>${reply[i].message}</p><p class="time">${reply[i].time}</div><hr>`);
 				}
 			}
@@ -135,7 +132,6 @@ function addMarker(e){
     if (selected && layerControl) {
     	cleanSelected();
     }
-	console.log(JSON.stringify(e.latlng));
     var marker = L.marker(e.latlng);
     selected = L.layerGroup().addLayer(marker).addTo(map);
     select_marker = marker;

@@ -10,6 +10,7 @@ const Basic = require('hapi-auth-basic');
 var fs = require("fs");
 
 // Create a server with a host and port
+
 const server = new Hapi.Server();
 
 server.connection({
@@ -71,7 +72,7 @@ server.route({
             .then(reply("200"));
         }
     }
-    
+
 });
 
 
@@ -91,16 +92,15 @@ server.route({
             } if (amount) {
                 q = q + ' ORDER BY time DESC LIMIT ' + amount;
             } else {
-                 q = q + ' ORDER BY time DESC';
+                 q = q + ' ORDER BY time ASC';
             }
             pg.query(q, [])
             .then((results) => {
-                console.log(results.rows.length);
                 reply(results.rows);
             }).catch((e) => {console.log(e)});
         }
     }
-    
+
 });
 
 
@@ -123,12 +123,11 @@ server.route({
     config: {
         auth: 'simple',
         handler: function (request, reply) {
-            console.log(request.payload.location)
             pg.query('INSERT INTO message (location, message, icon) VALUES ($1, $2, $3);', [request.payload.location, request.payload.message, request.payload.pokemon]);
             reply();
         }
     }
-    
+
 });
 
 server.route({
@@ -158,7 +157,7 @@ server.route({
                 })
         }
     }
-    
+
 });
 
 
@@ -175,7 +174,6 @@ server.route({
         },
 
         handler: function (request, reply) {
-            console.log("request.payload");
             var data = request.payload;
             if (data.file) {
                 var name = data.file.hapi.filename;
