@@ -7,6 +7,7 @@ const Hoek = require('hoek');
 const pg = require('./pg');
 const Promise = require("bluebird");
 const Basic = require('hapi-auth-basic');
+const fs = require('fs');
 
 // Create a server with a host and port
 
@@ -28,6 +29,8 @@ server.register([Inert, Vision, h2o2, Basic], (err) => {
     path: 'views',
   });
 });
+
+
 
 function validate(request, username, password, cb) {
     if(username === 'AOH' && password === 'onBestEver') {
@@ -161,6 +164,17 @@ server.route({
     }
 });
 
+server.route({
+  method: 'GET',
+  path: '/pictures',
+  config: {
+      handler: function (request, reply) {
+        fs.readdir('./src/static/pictures', (err, files) => {
+          reply.view('pictures', {fileNames: files});
+        })
+      }
+  }
+});
 
 // Start the server
 server.start((err) => {
