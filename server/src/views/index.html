@@ -2,7 +2,8 @@
 <head>
     <link rel="shortcut icon" href="static/shelder.ico" />
     <meta charset='utf-8' />
-    <title></title>
+    <title>Niantic mainframe</title>
+    <script type="text/javascript" src="static/js/jquery.js"></script>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.30.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.30.0/mapbox-gl.css' rel='stylesheet' />
@@ -58,6 +59,7 @@
     }
 
     #content{
+      text-align: left;
       font-size: 6vw;
     }
 
@@ -73,7 +75,15 @@
       right: 10px;
       width: 20vw;
     }
-
+    #cameraRight{
+      position: absolute;
+      left: 2vw;
+      bottom: 40vh;
+    }
+    #cam {
+      width: 60px;
+      height: 60px;
+    }
     #ball{
       position: absolute;
       width: 25vw;
@@ -90,6 +100,12 @@
       left: 10px;
       width: 20vw;
     }
+    .hiddenForm {
+      visibility: none;
+      height: 1;
+      width: 1;
+    }
+
 </style>
 
 <div id='map'></div>
@@ -101,6 +117,12 @@
   <div id="content"></div>
 </div>
 
+<form class="hiddenForm" method="post" enctype="multipart/form-data"  action="image">
+      <input id="myFileInput" type="file" accept="image/*" capture="camera" />
+</form>
+<div id='cameraRight'>
+  <img id='cam' src="static/camera.png" onclick="takePic()"></img>
+</div>
 <div id='guiBottom'>
 <img id='rotRight' src="static/rotRight.png" onclick="rotateMap(45)"></img>
 <img id='ball' src="static/pokeball.svg" onclick="toggleMenu()"></img>
@@ -131,9 +153,9 @@ function getGPS(){
   if(navigator.geolocation){
     var options = {timeout:60000, enableHighAccuracy:true};
     navigator.geolocation.watchPosition(setPos, errorHandler, options);
-	}else{
-		alert("no gps");
-	}
+  }else{
+    alert("no gps");
+  }
 }
 
 function setPos(loc){
@@ -159,13 +181,16 @@ function resetRotate(){
 }
 
 
-
 var menu = document.getElementById('menu');
 var content = document.getElementById('content');
 menu.style.top = '-100vh';
 
 function toggleMenu(){
   menu.style.top = (menu.style.top == '-100vh' ? '4vh' : '-100vh');
+}
+
+function takePic() {
+  $("#myFileInput").trigger('click');
 }
 
 function showMessage(event){
@@ -181,7 +206,6 @@ function showMessage(event){
 setInterval(function(){
   var locStr = '{"lat":' + lastLoc.lat + ', "lng":' + lastLoc.lng +'}';
   $.post("/location", {location: locStr}, function( data ){
-    console.log(data);
   });
 }, 15000);
 
@@ -214,16 +238,61 @@ setInterval(function(){
       pokemonCount++;
     }
   });
-}, 5000);
+}, 15000);
 
-function errorHandler(err){
-
+function errorHandler(e) {
+  console.log(e);
 }
 
+setInterval(function(){
+  var locStr = '{"lat":' + lastLoc.lat + ', "lng":' + lastLoc.lng +'}';
+  $.post("/location", {location: locStr}, function( data ){
+  });
+}, 120000);
+
+var myInput = document.getElementById('myFileInput');
+
+function sendPic() {
+      var data = new FormData();
+      data.append("file", myInput.files[0]);
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", '/image', true);
+      xhr.onload = function (e) {
+          if (this.status == 200) {
+              console.log("more pics");
+          }
+      };
+      xhr.send(data);
+    // Send file here either by adding it to a `FormData` object 
+    // and sending that via XHR, or by simply passing the file into 
+    // the `send` method of an XHR instance.
+}
+
+$(myInput).change(sendPic);
+
+var msg = [];
+function getMessages() {
+  $.get( "/get_messages", function( data ) {
+    for(var i = pokemonCount; i < data.length; i++){
+      var img_url = 'static/pokemons/' + data[i].icon +'.png';
+      pokemons[i] = document.createElement('div');
+      pokemons[i].className = 'marker';
+      pokemons[i].style.backgroundImage = 'url(' + img_url + ')';
+
+      pokemons[i].dataset.msg = '' + data[i].message;
+      pokemons[i].onclick = function(){ showMessage(event) };
+
+      var pokeLoc = JSON.parse(data[i].location);
+
+      new mapboxgl.Marker(pokemons[i]).setLngLat([pokeLoc.lng, pokeLoc.lat]).addTo(map);
+      pokemonCount++;
+    }
+  });
+}
+getMessages();
+setInterval(getMessages, 15000);
 getGPS();
 
 </script>
-<script type="text/javascript" src="static/js/jquery.js"></script>
-
 </body>
 </html>

@@ -31,7 +31,6 @@ server.register([Inert, Vision, h2o2, Basic], (err) => {
 });
 
 
-
 function validate(request, username, password, cb) {
     if(username === 'AOH' && password === 'onBestEver') {
         cb(null, true, { id: username, name: username });
@@ -87,7 +86,6 @@ server.route({
             }
             pg.query(q, [])
             .then((results) => {
-                console.log(results.rows.length);
                 reply(results.rows);
             }).catch((e) => {console.log(e)});
         }
@@ -115,7 +113,6 @@ server.route({
     config: {
         auth: 'simple',
         handler: function (request, reply) {
-            console.log(request.payload.location)
             pg.query('INSERT INTO message (location, message, icon) VALUES ($1, $2, $3);', [request.payload.location, request.payload.message, request.payload.pokemon]);
             reply();
         }
@@ -155,6 +152,45 @@ server.route({
 
 
 server.route({
+    method: 'POST',
+    path: '/image',
+    config: {
+
+        payload: {
+            maxBytes: 10048576,
+            output: 'stream',
+            parse: true,
+            allow: 'multipart/form-data'
+        },
+
+        handler: function (request, reply) {
+            var data = request.payload;
+            if (data.file) {
+                var name = data.file.hapi.filename;
+                var path = __dirname + "/images/" + name;
+                var file = fs.createWriteStream(path);
+
+                file.on('error', function (err) {
+                    console.error(err)
+                });
+
+                data.file.pipe(file);
+
+                data.file.on('end', function (err) {
+                    var ret = {
+                        filename: data.file.hapi.filename,
+                        headers: data.file.hapi.headers
+                    }
+                    reply(JSON.stringify(ret));
+                })
+            }
+
+        }
+    }
+});
+
+
+server.route({
     method: 'GET',
     path: '/static/{param*}',
     handler: {
@@ -175,6 +211,8 @@ server.route({
       }
   }
 });
+
+
 
 // Start the server
 server.start((err) => {
